@@ -2,6 +2,9 @@
 title: "Analysis of genotypes in Skin-Enhancer Knockout mice"
 author: "Zane Goodwin"
 date: "December 25, 2016"
+output: 
+  html_document: 
+    keep_md: yes
 ---
 ## Background
 Enhancers are critical for increasing gene expression in a tissue-specific manner. My lab generated a mouse line where an enhancer required for epithelial development has been removed via genetic manipulation. As we weren't sure which genes would be affected by removing this enhancer, we sought to measure the expression of all genes in the the genomes of mice with the enhancer intact (wild type or "WT") and in the genmoes of mice with the enhancer partially intact (heterozygotes or "het") or completely removed (mutants or "mut"). By analyzing the diffrerences in gene expression between the "het" and "wt" and between the "mut" and "wt" mice, then we will gain a clearer picture of how this enhancer regulates gene expression in mice. Furthermore, we would like to see how gene epxression levels are changing between embryonic developmental time points (E14.5, E15.5, E16.5, E17.5 and newborn (NB)) when the skin barrier is established in mice.
@@ -170,15 +173,69 @@ e16_5_vfit = lmFit(e16_5_wts) %>% eBayes(.)
 e17_5_vfit = lmFit(e17_5_wts) %>% eBayes(.)
 nb_vfit = lmFit(nb_wts) %>% eBayes(.)
 
-diffexp_14_5 = topTable(e14_5_vfit, adjust="BH", number = 10, sort.by = "F")
-diffexp_15_5 = topTable(e15_5_vfit, adjust="BH", number = 10, sort.by = "F")
-diffexp_16_5 = topTable(e16_5_vfit, adjust="BH", number = 10, sort.by = "F")
-diffexp_17_5 = topTable(e17_5_vfit, adjust="BH", number = 10, sort.by = "F")
-diffexp_nb = topTable(nb_vfit, adjust="BH", number = 10, sort.by = "F")
+diffexp_14_5 = topTable(e14_5_vfit, adjust="BH", number = Inf, sort.by = "F")
+diffexp_15_5 = topTable(e15_5_vfit, adjust="BH", number = Inf, sort.by = "F")
+diffexp_16_5 = topTable(e16_5_vfit, adjust="BH", number = Inf, sort.by = "F")
+diffexp_17_5 = topTable(e17_5_vfit, adjust="BH", number = Inf, sort.by = "F")
+diffexp_nb = topTable(nb_vfit, adjust="BH", number = Inf, sort.by = "F")
 
 ```
 
 ## Visualization of differentially expressed genes
 
+Let's take a look at the top 10 differentially expressed genes in each group:
+```{r echo=TRUE}
+head(diffexp_14_5, n=10)
+head(diffexp_15_5, n=10)
+head(diffexp_16_5, n=10)
+head(diffexp_17_5, n=10)
+head(diffexp_nb, n=10)
+```
+
+P-values were corrected for multiple tests using the Benjamnini-Hochberg method. I will consider only genes that are significant at the 5% level for each of the 5 time points. The genes that satisfy this condition are g06152, g15049 and g15227. Let's take a look at how the expression levels of these genes change over time. Though these genes were not significant at the 5% level for the newborn (NB) time point, 
+
+```{r echo = TRUE}
+# Shift rownames to new column
+diffexp_14_5$gene = rownames(diffexp_14_5)
+diffexp_15_5$gene = rownames(diffexp_15_5)
+diffexp_16_5$gene = rownames(diffexp_16_5)
+diffexp_17_5$gene = rownames(diffexp_17_5)
+diffexp_nb$gene = rownames(diffexp_nb)
+
+# Add time data to columns
+diffexp_14_5$timepoint = rep(14.5,nrow(diffexp_14_5))
+diffexp_15_5$timepoint = rep(15.5,nrow(diffexp_15_5))
+diffexp_16_5$timepoint = rep(16.5,nrow(diffexp_16_5))
+diffexp_17_5$timepoint = rep(17.5,nrow(diffexp_17_5))
+diffexp_nb$timepoint = rep("NB",nrow(diffexp_nb))
 
 
+# Pull out the expression levels for the genes of interest for each time point.
+goi = data.frame()
+genes = c("g06152", "g15049", "g15227")
+goi = rbind(goi,
+      diffexp_14_5[which(diffexp_14_5$gene %in% genes),],
+      diffexp_15_5[which(diffexp_15_5$gene %in% genes),],
+      diffexp_16_5[which(diffexp_16_5$gene %in% genes),],
+      diffexp_17_5[which(diffexp_17_5$gene %in% genes),],
+      diffexp_nb[which(diffexp_nb$gene %in% genes),])
+
+# Select columns
+goi_select = goi[,c(1,2,7,8)]
+
+# Melt the data frame
+library(reshape)
+mdf = melt(goi_select, id.vars=3:4, measure.vars=1:2, variable_name = "genotype")
+mdf$genotype = gsub("genotype", "", mdf$genotype)
+mdf$genotype = gsub("het", "Het vs. WT", mdf$genotype)
+mdf$genotype = gsub("mut", "Mut vs. WT", mdf$genotype)
+
+# Plot the fold change in expression versus time
+ggplot(data=mdf, aes(x=timepoint, y = value, colour=genotype)) + 
+      geom_point() + 
+      geom_line(aes(group=genotype)) + 
+      facet_grid(~ gene) + 
+      xlab("Timepoint") + 
+      ylab("Log Fold-Change")
+```
+Here, you can see that mice with a heterozygous copy of the enhancer and with the mutant enhancer have different expression levels. What's more is that for g15049 and g15227, the mutant enhancer mice show a dose-dependent decrease in expression that occurs at all time points. A notable exception is g06152, where the mutant shows a higher increase in gene expression compared to the wild type and to the heterozygote. This suggests that this gene is up-regulated in response to enhancer loss and could be a genetic compensatory effect. 
