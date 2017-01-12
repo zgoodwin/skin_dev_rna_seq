@@ -25,4 +25,5 @@ To plot expression levels for your favorite gene in the hom mice \(relative to w
 *To do's:*
 
 - [ ] Finish script to plot gene of interest versus developmental time point.
+- [x] Add plots
 - [x] Re-organize code
