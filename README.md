@@ -14,7 +14,7 @@ Rscript ./analysis/genotype_analysis_script.R
 
 To plot expression levels for your favorite gene in the hom mice \(relative to wild type\) for each of the five developmental time points, you can use the goi\_vs\_time script, which is not yet implemented.
 
-To do's:
+*To do's:*
 
-[ ] Finish script to plot gene of interest versus developmental time point.
-[x] Re-organize code
+- [ ] Finish script to plot gene of interest versus developmental time point.
+- [x] Re-organize code
