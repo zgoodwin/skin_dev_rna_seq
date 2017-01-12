@@ -5,11 +5,11 @@ The code in this document reprepents an analysis that I performed in R to analyz
 To do this, I used bioconductor's [limma voom](https://bioconductor.org/packages/release/bioc/html/limma.html) package for RNA-seq data. Limma also provides a useful set of tools for performing statistical tests on 
 
 You can run the entire analysis as follows:
-'''
+```
 Rscript genotype_analysis_script.R
-'''
+```
 
 To plot expression levels for your favorite gene in the hom mice \(relative to wild type\) for each of the five developmental time points, you can use the following command:
-'''
+```
 Rscript whatever
-'''
+```
