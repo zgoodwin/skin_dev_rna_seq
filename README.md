@@ -12,6 +12,14 @@ You can run the entire analysis as follows:
 Rscript ./analysis/genotype_analysis_script.R
 ```
 
+## Plot info
+
+The ./plots/ directory contains diagnostic plots drawn by the genotype_analysis_script program. Below are some brief descriptions on how to interpret them. More information can be found on the [limma voom](https://bioconductor.org/packages/release/bioc/html/limma.html) documentation.
+
+* ./plots/mds_plots.pdf - Diplays the mulidimensional scaling (MDS) for each time point.
+* ./plots/mean_var_plots.pdf - Plots the gene expression couns versus the variance in gene exprssion counts for each gene (the curve should look like a sideways "S")
+* ./plots/weight_plots.pdf - Quality weights for each of the experiments. The lower the weight, the lower the sample quality.
+
 To plot expression levels for your favorite gene in the hom mice \(relative to wild type\) for each of the five developmental time points, you can use the goi\_vs\_time script, which is not yet implemented.
 
 *To do's:*
