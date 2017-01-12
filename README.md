@@ -12,13 +12,19 @@ You can run the entire analysis as follows:
 Rscript ./analysis/genotype_analysis_script.R
 ```
 
+## Data
+
+* *./data/all_counts.csv -* Transcript counts for the genes in all all mice (all timepoints and genotypes)
+* *./data/sample_key.csv -* Metadata for each sample, specifying the timepoint, genotype and unique ID for each mouse.
+* *./data/all_diffexp_genes.csv -* List of differentially expressed genes (relative to wt) for all time points.
+
 ## Plot info
 
 The ./plots/ directory contains diagnostic plots drawn by the genotype_analysis_script program. Below are some brief descriptions on how to interpret them. More information can be found on the [limma voom](https://bioconductor.org/packages/release/bioc/html/limma.html) documentation.
 
-* ./plots/mds_plots.pdf - Diplays the mulidimensional scaling (MDS) for each time point.
-* ./plots/mean_var_plots.pdf - Plots the gene expression couns versus the variance in gene exprssion counts for each gene (the curve should look like a sideways "S")
-* ./plots/weight_plots.pdf - Quality weights for each of the experiments. The lower the weight, the lower the sample quality.
+* *./plots/mds_plots.pdf -* Diplays the mulidimensional scaling (MDS) for each time point.
+* *./plots/mean_var_plots.pdf -* Plots the gene expression couns versus the variance in gene exprssion counts for each gene (the curve should look like a sideways "S")
+* *./plots/weight_plots.pdf -* Quality weights for each of the experiments. The lower the weight, the lower the sample quality.
 
 To plot expression levels for your favorite gene in the hom mice \(relative to wild type\) for each of the five developmental time points, you can use the goi\_vs\_time script, which is not yet implemented.
 
