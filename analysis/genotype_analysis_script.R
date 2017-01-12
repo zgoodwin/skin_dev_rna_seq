@@ -73,7 +73,7 @@ get_design_matrix = function(sample_list, search_string, reference){
   #   search_string: Key name to access an experiment from counts_table
   #   sample_list: Name of the reference genotype
   #
-  # Returns: an R plot object
+  # Returns: a text object representing a design matrix for a linear model
   # 
   
   sample = sample_list[grep(search_string,sample_list$Age),]
