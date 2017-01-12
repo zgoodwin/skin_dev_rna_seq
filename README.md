@@ -18,6 +18,8 @@ Rscript ./analysis/genotype_analysis_script.R
 * **./data/sample_key.csv -** Metadata for each sample, specifying the timepoint, genotype and unique ID for each mouse.
 * **./data/all_diffexp_genes.csv -** List of differentially expressed genes (relative to wt) for all time points.
 
+The ./data/data_formats.md file contains definitions for each column of each table.
+
 ## Plot info
 
 The ./plots/ directory contains diagnostic plots drawn by the genotype_analysis_script program. Below are some brief descriptions on how to interpret them. More information can be found on the [limma voom](https://bioconductor.org/packages/release/bioc/html/limma.html) documentation.
@@ -31,6 +33,6 @@ To plot expression levels for your favorite gene in the hom mice \(relative to w
 ## To do's:
 
 - [ ] Finish script to plot gene of interest versus developmental time point.
-- [ ] Fix plot ordering
+- [ ] Fix plot label ordering
 - [x] Add plots
 - [x] Re-organize code

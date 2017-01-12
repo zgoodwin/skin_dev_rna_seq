@@ -140,11 +140,11 @@ DESIGN_MATRICES = "../design_matrices/"
 RESULTS_DIR = "../results/"
 
 ## Load the sample key, which contains metadata about each RNA-seq run 
-#  (format is in the README file)
+#  (format is specified in the data/data_format.md file)
 sampleKey = read.csv(SAMPLE_KEY_FILE, header=T)
 
 ## Load the read counts for each gene and for each experiment 
-#  (format is in the README file)
+#  (format is specified in the data/data_format.md file)
 counts = read.csv(COUNT_FILE, header=T, row.names=1)
 
 all = data.frame()
