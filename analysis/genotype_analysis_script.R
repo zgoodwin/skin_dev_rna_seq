@@ -149,11 +149,10 @@ counts = read.csv(COUNT_FILE, header=T, row.names=1)
 
 all = data.frame()
 referenceGenotype = "wt"
-
+ages = unique(sampleKey$Age)
 dgeObjects = rep(NA, length(ages))
 weightObjects  = rep(NA, length(ages))
 
-ages = unique(sampleKey$Age)
 for (i in 1:length(ages)){
   currentAge = ages[i]
 
@@ -163,8 +162,9 @@ for (i in 1:length(ages)){
   # Need to find a better way to plot mean vs variance
   dgeObjects[i] = list(voom(dge, designMatrix, plot=FALSE, save.plot = TRUE))
   
-  weightObjects[i] = list(voomWithQualityWeights(dge, designMatrix,
-                                   normalization = "none", plot=FALSE))
+  weights = voomWithQualityWeights(dge, designMatrix,
+                                   normalization = "none", plot=FALSE)
+  weightObjects[i] = list(weights)
   
   vfit = lmFit(weights) %>% eBayes(.)
   hits = topTable(vfit, adjust="BH", number = Inf, sort.by = "F")
@@ -178,23 +178,23 @@ for (i in 1:length(ages)){
 write.csv(all,file = "../data/all_diffexp_genes.csv",quote=T)
 
 # Draw the mds plots
-# pdf()
+pdf("../plots/mds_plots.pdf")
 par(mfrow=c(2,3))
 for (i in 1:length(ages)){
   get_mds_plot(dgeObjects[[i]], ages[i], sampleKey)
 }
-# dev.off()
+dev.off()
 
 # Draw the mean-variance plots
-# pdf()
+pdf("../plots/mean_var_plots.pdf")
 par(mfrow=c(2,3))
 for (i in 1:length(ages)){
   plot_mean_variance(dgeObjects[[i]], ages[i])
 }
-# dev.off()
+dev.off()
 
 # Draw the sample weights
-# pdf()
+pdf("../plots/weight_plots.pdf")
 ggplotObjects = rep(NA, length(ages))
 for (i in 1:length(ages)){
   ggplotObjects[i] = list(plot_weights(weightObjects[[i]], ages[i]))
@@ -206,5 +206,5 @@ multiplot(ggplotObjects[[1]],
           ggplotObjects[[4]],
           ggplotObjects[[5]],
           cols = 3)
-# dev.off()
+dev.off()
 ################### END ###################
