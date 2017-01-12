@@ -1,6 +1,6 @@
 ###############################################################################
 # Program: genotype_analysis.R
-# Project: Analysis of 
+# Project: Analysis of RNA-seq data from the developing mouse epidermis
 # Description: Performs the limma voom RNA-seq analysis for genome-wide
 #               read-count data.
 #
