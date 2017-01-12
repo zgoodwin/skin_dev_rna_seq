@@ -1,7 +1,8 @@
 ###############################################################################
 # Program: genotype_analysis.R
 # Project: Analysis of 
-# Description: 
+# Description: Performs the limma voom RNA-seq analysis for genome-wide
+#               read-count data.
 #
 # Author: Zane Goodwin
 # Date: 01/11/2017
@@ -22,12 +23,17 @@ library(ggplot2)
 #      FUNCTIONS      #
 #######################
 
-####
-# Name: setup_dge
-# Purpose: 
-# Args:
-#     
 setup_dge = function(counts_table, search_string){
+  # Creates a dge object. 
+  #
+  # Args:
+  #   counts_table: Table of read counts 
+  #   search_string: Key name to access an experiment from counts_table
+  #
+  # Returns: A voom dge object for the RNA-seq experiment specified in
+  #   search_string
+  # 
+  
   counts = counts_table[,grep(search_string,colnames(counts))]
   dge = DGEList(counts = counts)
   dge = calcNormFactors(dge)
@@ -41,6 +47,16 @@ setup_dge = function(counts_table, search_string){
 }
 
 get_mds_plot = function(dge_object, search_string, sample_list){
+  # Generate an MDS plot for count data wrapped in a DGE object
+  # 
+  # Args:
+  #   dge_object: A limma dge object representing an RNA-seq experiment
+  #   search_string: Key name to access an experiment from counts_table
+  #   sample_list: Data frame of sample metadata
+  #
+  # Returns: an R plot object
+  # 
+  
   sample = sample_list[grep(search_string,sample_list$Age),]
   plot = plotMDS(dge_object, labels=paste(sample$Genotype, sample$Group),
                  main=paste(search_string, "MDS", sep=" "),
@@ -50,6 +66,16 @@ get_mds_plot = function(dge_object, search_string, sample_list){
 }
 
 get_design_matrix = function(sample_list, search_string, reference){
+  # Create a design matrix for fitting linear models to the count data.
+  # 
+  # Args:
+  #   dge_object: Sample metadata table 
+  #   search_string: Key name to access an experiment from counts_table
+  #   sample_list: Name of the reference genotype
+  #
+  # Returns: an R plot object
+  # 
+  
   sample = sample_list[grep(search_string,sample_list$Age),]
   genotype = relevel(sample$Genotype, ref=reference)
   design = model.matrix(~genotype)
@@ -57,14 +83,37 @@ get_design_matrix = function(sample_list, search_string, reference){
 }
 
 plot_mean_variance = function(voom_object, title){
-  plot(voom_object$voom.xy, 
+  # Produces a plot that shows the read counts for each gene (x-axis)
+  #   count standard deviation for each gene.
+  # 
+  # Args:
+  #   voom_object: Sample metadata table 
+  #   title: The title of the plot
+  #
+  # Returns: an R plot object
+  # 
+  
+  p = plot(voom_object$voom.xy, 
        main = paste(title,":Mean-variance trend"), 
        xlab = "log2( count size + 0.5 )", 
        ylab = "Sqrt( standard deviation )")
+  
   lines(voom_object$voom.line$x, voom_object$voom.line$y, type = "l", col="red")
+  return(p)
 }
 
 plot_weights = function(voom_object, title){
+  # Plot the weights for each RNA-seq experiment.
+  #
+  # Args:
+  #   voom_object: Normalized limma voom object.
+  #   title: Plot title
+  #
+  # This part puts the samples and weights into a data frame so ggplot can 
+  # read them.
+  #
+  # Returns: an R plot object 
+  
   df = data.frame(samples = rownames(voom_object$targets), 
                   wts = voom_object$sample.weights)
   
@@ -86,7 +135,7 @@ plot_weights = function(voom_object, title){
 
 ## File locations
 COUNT_FILE = "../data/all_counts.csv"
-SAMPLE_KEY_FILE = "../data/sample_key_obs.csv"
+SAMPLE_KEY_FILE = "../data/sample_key.csv"
 DESIGN_MATRICES = "../design_matrices/"
 RESULTS_DIR = "../results/"
 
@@ -98,111 +147,64 @@ sampleKey = read.csv(SAMPLE_KEY_FILE, header=T)
 #  (format is in the README file)
 counts = read.csv(COUNT_FILE, header=T, row.names=1)
 
+all = data.frame()
+referenceGenotype = "wt"
 
-## IMPORTANT: set up design matrices for each experiment. This is needed to fit
-#  linear models between the wild type and knockout mice
-e14_5_dm = get_design_matrix(sampleKey, "E14.5", "wt")
-e15_5_dm = get_design_matrix(sampleKey, "E15.5", "wt")
-e16_5_dm = get_design_matrix(sampleKey, "E16.5", "wt")
-e17_5_dm = get_design_matrix(sampleKey, "E17.5", "wt")
-nb_dm = get_design_matrix(sampleKey, "NB", "wt")
+dgeObjects = rep(NA, length(ages))
+weightObjects  = rep(NA, length(ages))
 
+ages = unique(sampleKey$Age)
+for (i in 1:length(ages)){
+  currentAge = ages[i]
 
-## Get DGE objects for each time point
-e14_5_dge = setup_dge(counts, "E14.5")
-e15_5_dge = setup_dge(counts, "E15.5")
-e16_5_dge = setup_dge(counts, "E16.5")
-e17_5_dge = setup_dge(counts, "E17.5")
-nb_dge = setup_dge(counts, "NB")
+  designMatrix = get_design_matrix(sampleKey, currentAge, referenceGenotype)
+  dge = setup_dge(counts, currentAge)
 
+  # Need to find a better way to plot mean vs variance
+  dgeObjects[i] = list(voom(dge, designMatrix, plot=FALSE, save.plot = TRUE))
+  
+  weightObjects[i] = list(voomWithQualityWeights(dge, designMatrix,
+                                   normalization = "none", plot=FALSE))
+  
+  vfit = lmFit(weights) %>% eBayes(.)
+  hits = topTable(vfit, adjust="BH", number = Inf, sort.by = "F")
+  hits$gene = rownames(hits)
+  hits$timepoint = rep(currentAge,nrow(hits))
+  
+  all = rbind(all, hits)
+}
 
-## For each experiment, draw diagnostic MDS plots, write to plots folder
-pdf("mds_plots.pdf")
+# Write the gene expression data for each experiment
+write.csv(all,file = "../data/all_diffexp_genes.csv",quote=T)
+
+# Draw the mds plots
+# pdf()
 par(mfrow=c(2,3))
-p1 = get_mds_plot(e14_5_dge, "E14.5", sampleKey)
-p2 = get_mds_plot(e15_5_dge, "E15.5", sampleKey)
-p3 = get_mds_plot(e16_5_dge, "E16.5", sampleKey)
-p4 = get_mds_plot(e17_5_dge, "E17.5", sampleKey)
-p5 = get_mds_plot(nb_dge, "NB", sampleKey)
-dev.off()
+for (i in 1:length(ages)){
+  get_mds_plot(dgeObjects[[i]], ages[i], sampleKey)
+}
+# dev.off()
 
-
-## Normalize read counts by fitting read counts to a negative binomial
-#  distribution.
-e14_5_norm = voom(e14_5_dge, e14_5_dm, plot=FALSE, save.plot = TRUE)
-e15_5_norm = voom(e15_5_dge, e15_5_dm, plot=FALSE, save.plot = TRUE)
-e16_5_norm = voom(e16_5_dge, e16_5_dm, plot=FALSE, save.plot = TRUE)
-e17_5_norm = voom(e17_5_dge, e17_5_dm, plot=FALSE, save.plot = TRUE)
-nb_norm = voom(nb_dge, nb_dm, plot=FALSE, save.plot = TRUE)
-
-# Visualize the distribution of read counts to check the mean-variance trend. 
-pdf("mean_variants_plots.pdf")
+# Draw the mean-variance plots
+# pdf()
 par(mfrow=c(2,3))
-plot_mean_variance(e14_5_norm, "E14.5")
-plot_mean_variance(e15_5_norm, "E15.5")
-plot_mean_variance(e16_5_norm, "E16.5")
-plot_mean_variance(e17_5_norm, "E17.5")
-plot_mean_variance(nb_norm, "NB")
-dev.off()
+for (i in 1:length(ages)){
+  plot_mean_variance(dgeObjects[[i]], ages[i])
+}
+# dev.off()
 
-#### SAMPLE WEIGHT NORMALIZATION ####
-
-# Down-weight outlier samples 
-e14_5_wts = voomWithQualityWeights(e14_5_dge, e14_5_dm, normalization = "none", plot=FALSE)
-e15_5_wts = voomWithQualityWeights(e15_5_dge, e15_5_dm, normalization = "none", plot=FALSE)
-e16_5_wts = voomWithQualityWeights(e16_5_dge, e16_5_dm, normalization = "none", plot=FALSE)
-e17_5_wts = voomWithQualityWeights(e17_5_dge, e17_5_dm, normalization = "none", plot=FALSE)
-nb_wts = voomWithQualityWeights(nb_dge, nb_dm, normalization = "none", plot=FALSE)
-
-# Visualize weights
+# Draw the sample weights
+# pdf()
+ggplotObjects = rep(NA, length(ages))
+for (i in 1:length(ages)){
+  ggplotObjects[i] = list(plot_weights(weightObjects[[i]], ages[i]))
+}
 source("./multiplot.R")
-multiplot(plot_weights(e14_5_wts, "E14.5"),
-          plot_weights(e15_5_wts, "E15.5"),
-          plot_weights(e16_5_wts, "E16.5"),
-          plot_weights(e17_5_wts, "E17.5"),
-          plot_weights(nb_wts, "NB"), cols=3)
-
-######## FIT BAYES MODELS ########
-
-# Fit bayes models to the weighted samples
-e14_5_vfit = lmFit(e14_5_wts) %>% eBayes(.)
-e15_5_vfit = lmFit(e15_5_wts) %>% eBayes(.)
-e16_5_vfit = lmFit(e16_5_wts) %>% eBayes(.)
-e17_5_vfit = lmFit(e17_5_wts) %>% eBayes(.)
-nb_vfit = lmFit(nb_wts) %>% eBayes(.)
-
-#### Obtain list of the top differentially expressed genes ####
-
-diffexp_14_5 = topTable(e14_5_vfit, adjust="BH", number = Inf, sort.by = "F")
-diffexp_15_5 = topTable(e15_5_vfit, adjust="BH", number = Inf, sort.by = "F")
-diffexp_16_5 = topTable(e16_5_vfit, adjust="BH", number = Inf, sort.by = "F")
-diffexp_17_5 = topTable(e17_5_vfit, adjust="BH", number = Inf, sort.by = "F")
-diffexp_nb = topTable(nb_vfit, adjust="BH", number = Inf, sort.by = "F")
-
-# Shift gene names to their own column for each dataset
-diffexp_14_5$gene = rownames(diffexp_14_5)
-diffexp_15_5$gene = rownames(diffexp_15_5)
-diffexp_16_5$gene = rownames(diffexp_16_5)
-diffexp_17_5$gene = rownames(diffexp_17_5)
-diffexp_nb$gene = rownames(diffexp_nb)
-
-# Add a a column for the timepoint.
-diffexp_14_5$timepoint = rep(14.5,nrow(diffexp_14_5))
-diffexp_15_5$timepoint = rep(15.5,nrow(diffexp_15_5))
-diffexp_16_5$timepoint = rep(16.5,nrow(diffexp_16_5))
-diffexp_17_5$timepoint = rep(17.5,nrow(diffexp_17_5))
-diffexp_nb$timepoint   = rep("NB",nrow(diffexp_nb))
-
-# Combine all data into a single table, long format.
-all_diffexp_genes = rbind(diffexp_14_5,
-                          diffexp_15_5,
-                          diffexp_16_5,
-                          diffexp_17_5,
-                          diffexp_nb)
-
-# Write and format gene expression tables.
-write.csv(all_diffexp_genes,
-          file = "../data/all_diffexp_genes.csv",
-          quote=T)
-
+multiplot(ggplotObjects[[1]],
+          ggplotObjects[[2]],
+          ggplotObjects[[3]],
+          ggplotObjects[[4]],
+          ggplotObjects[[5]],
+          cols = 3)
+# dev.off()
 ################### END ###################
