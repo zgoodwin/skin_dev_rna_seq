@@ -7,7 +7,7 @@ I sought to determine which genes were differentially expressed in the hom mice 
 **DISCLAIMER:** This is unpublished data. As such, the gene names in the count data have been de-identified, and the original BAM files from which the gene counts were derived will not be provided.
 
 
-You can run the entire analysis as follows:
+You can run the entire analysis as follows (make to set your working directory in R to the "analysis" folder):
 ```
 # Run the analysis, produce text files with log-Fold change in gene expression
 #   in het/mut mice relative to wild-type mice over 5 developmental time points.
