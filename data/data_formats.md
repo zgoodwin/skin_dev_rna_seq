@@ -11,14 +11,14 @@ The remainder of the columns are identifers for each RNA-seq experiment. They ar
 
 This file is the output from genotype_analysis_script.R. The column names are as follows:
 
-1. genotypehet -  Average log-fold change in expression for the heterozygous mice, relative to wt (wild-type).
-2. genotypemut -  Average log-fold change in expression for the homozygous mutant mice, relative to wt (wild-type).
-3. AveExpr -  Average expression level for the gene across all samples.
-4. F -  F-statistic.
-5. P.Value -  Raw P-value.
-6. adj.P.Val -  FDR-corrected P-value.
-7. gene -  Gene identifier.
-8. timepoint -  Developmental time point.
+1. **genotypehet -**  Average log-fold change in expression for the heterozygous mice, relative to wt (wild-type).
+2. **genotypemut -**  Average log-fold change in expression for the homozygous mutant mice, relative to wt (wild-type).
+3. **AveExpr -**  Average expression level for the gene across all samples.
+4. **F -**  F-statistic.
+5. **P.Value -**  Raw P-value.
+6. **adj.P.Val -**  FDR-corrected P-value.
+7. **gene -**  Gene identifier.
+8. **timepoint -**  Developmental time point.
 
 # sample_key.csv
 
@@ -26,7 +26,7 @@ This file contains information about each RNA-seq experiment (in long format) an
 
 Column names:
 
-1. Genotype -  Mouse genotype
-2. Age -  Mouse developmental time point
-3. Group -  Litter number
+1. **Genotype -**  Mouse genotype
+2. **Age -**  Mouse developmental time point
+3. **Group -**  Litter number
 
