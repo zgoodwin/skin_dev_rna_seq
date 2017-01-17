@@ -4,8 +4,9 @@ This file contains the read counts for each gene. The first column is a list of 
 
 The remainder of the columns are identifers for each RNA-seq experiment. They are formatted as follows:
 
-\[genotype\]_\[time point\]_\[litter number\]
-
+```
+  [genotype]_[time point]_[litter number]
+```
 
 # all_diffexp_genes.csv
 
