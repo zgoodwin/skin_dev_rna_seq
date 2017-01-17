@@ -9,7 +9,12 @@ I sought to determine which genes were differentially expressed in the hom mice 
 
 You can run the entire analysis as follows:
 ```
+# Run the analysis, produce text files with log-Fold change in gene expression
+#   in het/mut mice relative to wild-type mice over 5 developmental time points.
 Rscript ./analysis/genotype_analysis_script.R
+
+# Show changes in log-Fold change over time for your favorite gene(s)
+Rscript ./analysis/goi_vs_time.R <gene 1> ... <gene N>
 ```
 
 ## Data
@@ -32,7 +37,7 @@ To plot expression levels for your favorite gene in the hom mice \(relative to w
 
 ## To do's:
 
-- [ ] Finish script to plot gene of interest versus developmental time point.
-- [ ] Fix plot label ordering
+- [x] Finish script to plot gene of interest versus developmental time point.
 - [x] Add plots
 - [x] Re-organize code
+- [ ] Fix plot label ordering
