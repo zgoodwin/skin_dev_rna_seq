@@ -13,11 +13,8 @@
 #       PACKAGES       #
 ########################
 
-library(limma)
-library(edgeR)
-library(stringr)
-library(reshape)
-library(ggplot2)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(limma, edgeR, stringr, reshape, ggplot2, optparse)
 
 #######################
 #      FUNCTIONS      #
@@ -133,19 +130,43 @@ plot_weights = function(voom_object, title){
 # EXECUTED STATEMENTS #
 #######################
 
-## File locations
-COUNT_FILE = "../data/all_counts.csv"
-SAMPLE_KEY_FILE = "../data/sample_key.csv"
-DESIGN_MATRICES = "../design_matrices/"
-RESULTS_DIR = "../results/"
+## Parse command line arguments
+option_list = list(
+  make_option(c("-c", "--countFile"), type="character", default=NULL, 
+              help="Read count file", metavar="character"),
+  make_option(c("-k", "--keyFile"), type="character", default=NULL, 
+              help="Key File", metavar="character"),
+  make_option(c("-r", "--results"), type="character", default=NULL,
+              help="Directory for output files", metavar="character"),
+  make_option(c("-p", "--plots"), type="character", default=NULL,
+              help="Directory for plots", metavar="character")
+); 
+
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
+
+# Check command line arguments
+if (is.null(opt$countFile)){
+  print_help(opt_parser)
+  stop("The count file is not specified.", call.=FALSE)
+} else if(is.null(opt$keyFile)){
+  print_help(opt_parser)
+  stop("The Key file is not specified.", call.=FALSE)
+} else if(is.null(opt$result)){
+  print_help(opt_parser)
+  stop("The result directory file is not specified.", call.=FALSE)
+} else if(is.null(opt$plots)){
+  print_help(opt_parser)
+  stop("The plot directory file is not specified.", call.=FALSE)
+}
 
 ## Load the sample key, which contains metadata about each RNA-seq run 
 #  (format is specified in the data/data_format.md file)
-sampleKey = read.csv(SAMPLE_KEY_FILE, header=T)
+sampleKey = read.csv(opt$keyFile, header=T)
 
 ## Load the read counts for each gene and for each experiment 
 #  (format is specified in the data/data_format.md file)
-counts = read.csv(COUNT_FILE, header=T, row.names=1)
+counts = read.csv(opt$countFile, header=T, row.names=1)
 
 all = data.frame()
 referenceGenotype = "wt"
@@ -178,7 +199,8 @@ for (i in 1:length(ages)){
 write.csv(all,file = "../data/all_diffexp_genes.csv",quote=T)
 
 # Draw the mds plots
-pdf("../plots/mds_plots.pdf")
+# pdf("../plots/mds_plots.pdf")
+pdf(paste0(opt$plots, "/mds_plots.pdf"))
 par(mfrow=c(2,3))
 for (i in 1:length(ages)){
   get_mds_plot(dgeObjects[[i]], ages[i], sampleKey)
@@ -186,15 +208,15 @@ for (i in 1:length(ages)){
 dev.off()
 
 # Draw the mean-variance plots
-pdf("../plots/mean_var_plots.pdf")
+pdf(paste0(opt$plots, "/mean_var_plots.pdf"))
 par(mfrow=c(2,3))
 for (i in 1:length(ages)){
   plot_mean_variance(dgeObjects[[i]], ages[i])
 }
 dev.off()
 
-# Draw the sample weights
-pdf("../plots/weight_plots.pdf")
+# Draw the sample weight plots
+pdf(paste0(opt$plots, "/weight_plots.pdf"))
 ggplotObjects = rep(NA, length(ages))
 for (i in 1:length(ages)){
   ggplotObjects[i] = list(plot_weights(weightObjects[[i]], ages[i]))

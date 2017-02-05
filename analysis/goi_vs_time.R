@@ -15,9 +15,8 @@
 #       PACKAGES       #
 ########################
 
-library(stringr)
-library(reshape)
-library(ggplot2)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(stringr, reshape, ggplot2)
 source('multiplot.R')
 
 #######################
@@ -47,8 +46,23 @@ read_dge = function(file){
 # EXECUTED STATEMENTS #
 #######################
 
-dge = read_dge("../data/all_diffexp_genes.csv")
-gene_list = commandArgs(trailingOnly = TRUE)
+# dge = read_dge("../data/all_diffexp_genes.csv")
+# gene_list = commandArgs(trailingOnly = TRUE)
+args = commandArgs(trailingOnly = TRUE)
+dgeFile = args[1]
+gene_list = args[2:length(args)]
+
+# Check command line arguments
+if (is.na(dgeFile)){
+  stop("The file with differential gene expression counts is not specified.",call.=FALSE)
+} else if (length(gene_list) == 0){
+  stop("No genes specified.", call.=FALSE)
+} else if (dgeFile == "-h"){
+  stop("Plot gene expression values versus development time.\n\tRscript goi_vs_time.R <differenially_expressed_genes.tsv> <gene1> ... <gene N>", call.=FALSE)
+}
+
+# Read in the list of differentially expressed genes.
+dge = read_dge(dgeFile)
 
 # Select the following fields: 
 #   het_v_wt_FC (col 2)
@@ -79,4 +93,3 @@ ggplot(data=mdf, aes(x=timepoint, y = value, colour=genotype)) +
              strip.text.x = element_text(face="bold"))
 dev.off()
 ################### END ###################
-
