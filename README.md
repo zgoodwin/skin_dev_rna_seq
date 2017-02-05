@@ -14,10 +14,10 @@ Usage: genotype_analysis_script.R [options]
 
 Options:
 	-c CHARACTER, --countFile=CHARACTER
-		Read count file
+		Read count file (see ./data/data_formats.md for format of this file)
 
 	-k CHARACTER, --keyFile=CHARACTER
-		Key File
+		Key File (see ./data/data_formats.md for the format of this file)
 
 	-r CHARACTER, --results=CHARACTER
 		Directory for output files
