@@ -1,20 +1,38 @@
 # Analysis of gene expression levels in developing mice with a skin-specific enhancer knockout.
 
-The code in this document reprepents an analysis that I performed in R to analyze gene expression levels in developing mouse skin. We measured gene expresion levels using [RNA-seq](https://en.wikipedia.org/wiki/RNA-Seq) at the E14.5, E15.5, E16.5, E17.5 and Newborn (NB) time points. Furthermore, these mice were genetically modified via CRISPR-cas to be deficient for an [enhancer](https://en.wikipedia.org/wiki/Enhancer_(genetics)) that we believe is important for the formation of the epidermis. RNA-seq for each time point was measured for mice that were homozygous knockout (hom) and wild-type (wt) for the enhancer.
+The code in this repository is an analysis that I performed in R to analyze gene expression levels in developing mouse skin. I sought to study the function of an [enhancer](https://en.wikipedia.org/wiki/Enhancer_(genetics)) that I believe is important for the formation of the mouse epidermis. To study the function of this enhancer, my lab made mice that had intact copies of the enhancer (wt), mice where only one copy of the enhancer was deleted (het), and mice where both copies of the enhancer were deleted (mut). Since this enhancer is usually active early in mouse development, I measured genome-wide gene expression levels at the E14.5, E15.5, E16.5, E17.5 and Newborn (NB) time points. Expression levels for all genes in the mouse genome were measured using [RNA-seq](https://en.wikipedia.org/wiki/RNA-Seq) at the E14.5, E15.5, E16.5, E17.5 and Newborn (NB) time points. 
 
-I sought to determine which genes were differentially expressed in the hom mice relative to the wt mice, for each developmental time point. To do this, I used bioconductor's [limma voom](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) package. 
+I next sought to determine which genes were differentially expressed in the hom mice relative to the wt mice and in the het mice relative to wt mice, at each developmental time point. To do this, I used bioconductor's [limma voom](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) package. 
 
 **DISCLAIMER:** This is unpublished data. As such, the gene names in the count data have been de-identified, and the original BAM files from which the gene counts were derived will not be provided.
 
-
-You can run the entire analysis as follows (make to set your working directory in R to the "analysis" folder):
+The **analysis** directory contains two scripts: one that performs the differential expression analysis for read count data (genotype_analysis_script.R) and one that plots gene expressio values versus time (goi_vs_time.R). Below are the help files for each script: 
 ```
-# Run the analysis, produce text files with log-Fold change in gene expression
-#   in het/mut mice relative to wild-type mice over 5 developmental time points.
-Rscript ./analysis/genotype_analysis_script.R
+Rscript genotype_analysis_script.R -h 
+Usage: genotype_analysis_script.R [options]
 
-# Show changes in log-Fold change over time for your favorite gene(s)
-Rscript ./analysis/goi_vs_time.R <gene 1> ... <gene N>
+
+Options:
+	-c CHARACTER, --countFile=CHARACTER
+		Read count file
+
+	-k CHARACTER, --keyFile=CHARACTER
+		Key File
+
+	-r CHARACTER, --results=CHARACTER
+		Directory for output files
+
+	-p CHARACTER, --plots=CHARACTER
+		Directory for plots
+
+	-h, --help
+		Show this help message and exit
+```
+
+```
+Rscript goi_vs_time.R -h
+Plot gene expression values versus development time.
+	Rscript goi_vs_time.R <differenially_expressed_genes.tsv> <gene1> ... <gene N>
 ```
 
 ## Data
