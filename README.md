@@ -4,20 +4,24 @@ The code in this repository is an analysis that I performed in R to analyze gene
 
 I determined the fold change in gene expression for hom mice relative to the wt mice and for the het mice relative to wt mice, at each developmental time point. To do this, I used bioconductor's [limma voom](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) package. 
 
-**DISCLAIMER:** This is unpublished data. As such, the gene names in the count data have been de-identified, and the original BAM files from which the gene counts were derived will not be provided.
+**DISCLAIMER:** This is unpublished data. As such, the gene names in the count data have been de-identified, and the original BAM files from which the gene counts were derived cannot be provided.
 
-The **analysis** directory contains two scripts: one that performs the differential expression analysis for read count data (genotype_analysis_script.R) and one that plots gene expressio values versus time (goi_vs_time.R). Below are the help files for each script: 
+The **analysis** directory contains two scripts: one that performs the differential expression analysis for read count data (differentialExpression.R) and one that plots gene expression values versus time (genesVsTime.R). Below are the help files for each script: 
+
+## differentialExpression.R
+
 ```
-Rscript genotype_analysis_script.R -h 
-Usage: genotype_analysis_script.R [options]
+Rscript differentialExpression.R
+Loading required package: pacman
+Usage: differentialExpression.R [options]
 
 
 Options:
-	-c CHARACTER, --countFile=CHARACTER
-		Read count file (see ./data/data_formats.md for format of this file)
+	-c CHARACTER, --controlCountFile=CHARACTER
+		Count file for control mice (should contain at least 2 replicates)
 
-	-k CHARACTER, --keyFile=CHARACTER
-		Key File (see ./data/data_formats.md for the format of this file)
+	-t CHARACTER, --testCountFile=CHARACTER
+		Count file for test mice (either WT or MUT)
 
 	-r CHARACTER, --results=CHARACTER
 		Directory for output files
@@ -25,20 +29,44 @@ Options:
 	-p CHARACTER, --plots=CHARACTER
 		Directory for plots
 
+	-a EXPERIMENTNAME, --experimentName=EXPERIMENTNAME
+		Name for this experiment
+
 	-h, --help
 		Show this help message and exit
-```
 
 ```
-Rscript goi_vs_time.R -h
-Plot gene expression values versus development time.
-	Rscript goi_vs_time.R <differenially_expressed_genes.tsv> <gene1> ... <gene N>
+
+## genesVsTime.R
+
 ```
+Rscript genesVsTime.R -h
+Loading required package: pacman
+Usage: genesVsTime.R [options]
+
+
+Options:
+	-i CHARACTER, --hitTableFile=CHARACTER
+		Table containing differentially expressed genes, fold changes and p-values.
+
+	-p CHARACTER, --plots=CHARACTER
+		Directory for plots
+
+	-l CHARACTER, --geneList=CHARACTER
+		Comma-separated list of genes to be plotted
+
+	-h, --help
+		Show this help message and exit
+
+
+```
+
+There is also a driver script (written in bash) called `analyzeTimePoints.sh`, which runs the differential expression analysis for each time point, combines the results, and then shows the change in gene expression over time for two genes of interest. Tables of genes containing differential expression data are stored in the `results` directory, and volcano plots, plus plots showing change in gene expression over time are in the `plots` directory.
 
 ## Input Data
 
-* **./data/all_counts.csv -** Transcript counts for the genes in all all mice (all timepoints and genotypes)
-* **./data/sample_key.csv -** Metadata for each sample, specifying the timepoint, genotype and unique ID for each mouse.
+* **A count file in CSV format (Control)-** Transcript counts for the genes in mice from each developmental time point, for the control genotype (wild-type). Columns correspond to biological replicates.
+* **A count file in CSV format (Test)-** Transcript counts for the genes in mice from each developmental time point, for the test genotype (heterozygote or mutant). Again, columns correspond to biological replicates.
 
 The ./data/data_formats.md file contains definitions for each column of each table.
 
@@ -46,22 +74,22 @@ The ./data/data_formats.md file contains definitions for each column of each tab
 
 * **./data/all_diffexp_genes.csv -** List of differentially expressed genes (relative to wt) for all time points.
 
-For each of the 5 time points, `genotype_analysis_script.R` prints out a table of differential gene expression values (log2-fold change) for each EDC gene. The ./data/data_formats.md file contains definitions for each column of this table.
+For each of the 5 time points, `differentialExpression.R` prints out a table of differential gene expression values (log2-fold change) for each EDC gene. The format of the output file is as follows:
+
+1. **logFC -**  Average log-fold change in expression for the test group (heterozygote or mutant) versus the controls (wild type).
+3. **AveExpr -**  Average expression level for the gene across all samples.
+4. **F -**  F-statistic.
+5. **P.Value -**  Raw P-value.
+6. **adj.P.Val -**  FDR-corrected P-value.
+8. **ExperimentName -**  Name of the experiment. In this case, it's the timepoint and the genotype of the mouse.
 
 
 ## Plot info
 
-The ./plots/ directory contains diagnostic plots drawn by the genotype_analysis_script program. Below are some brief descriptions on how to interpret them. More information can be found on the [limma voom](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) documentation.
+The ./plots/ directory contains diagnostic plots drawn by the `differentialExpression.R` program. Below are some brief descriptions on how to interpret them. More information can be found on the [limma voom](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) documentation.
 
-* **./plots/mds_plots.pdf -** Diplays the mulidimensional scaling (MDS) for each time point.
+* **./plots/mds_plots.pdf -** Diplays the mulidimensional scaling (MDS) for a given time point.
 * **./plots/mean_var_plots.pdf -** Plots the gene expression couns versus the variance in gene exprssion counts for each gene (the curve should look like a sideways "S")
 * **./plots/weight_plots.pdf -** Quality weights for each of the experiments. The lower the weight, the lower the sample quality.
 
-To plot expression levels for your favorite gene in the hom mice \(relative to wild type\) for each of the five developmental time points, you can use the goi\_vs\_time script.
-
-## To do's:
-
-- [x] Finish script to plot gene of interest versus developmental time point.
-- [x] Add plots
-- [x] Re-organize code
-- [ ] Fix plot label ordering
+To plot expression levels for your favorite gene in the hom mice \(relative to wild type\) for each of the five developmental time points, you can use the `genesVsTime.R` script.
