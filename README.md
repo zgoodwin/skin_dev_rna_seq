@@ -79,6 +79,7 @@ For each of the 5 time points, `differentialExpression.R` prints out a table of 
 4. **F -**  F-statistic.
 5. **P.Value -**  Raw P-value.
 6. **adj.P.Val -**  FDR-corrected P-value.
+7. **B -** B-statistic.
 8. **ExperimentName -**  Name of the experiment. In this case, it's the timepoint and the genotype of the mouse.
 
 
