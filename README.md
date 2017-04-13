@@ -68,8 +68,6 @@ There is also a driver script (written in bash) called `analyzeTimePoints.sh`, w
 * **A count file in CSV format (Control)-** Transcript counts for the genes in mice from each developmental time point, for the control genotype (wild-type). Columns correspond to biological replicates.
 * **A count file in CSV format (Test)-** Transcript counts for the genes in mice from each developmental time point, for the test genotype (heterozygote or mutant). Again, columns correspond to biological replicates.
 
-The ./data/data_formats.md file contains definitions for each column of each table.
-
 ## Output Data
 
 * **./data/all_diffexp_genes.csv -** List of differentially expressed genes (relative to wt) for all time points.
