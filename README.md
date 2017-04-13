@@ -84,10 +84,15 @@ For each of the 5 time points, `differentialExpression.R` prints out a table of 
 
 ## Plot info
 
-The ./plots/ directory contains diagnostic plots drawn by the `differentialExpression.R` program. Below are some brief descriptions on how to interpret them. More information can be found on the [limma voom](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) documentation.
+The ./plots/ directory contains diagnostic plots drawn by the `differentialExpression.R` program. Below are some brief descriptionsfor each type of plot. More information can be found on the [limma voom](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) documentation.
 
-* **./plots/mds_plots.pdf -** Diplays the mulidimensional scaling (MDS) for a given time point.
+# Data plots
+
+* **goi_v_time plots -** Shows gene expression versus time in the developing mouse. GOI stands for "gene of interest"
+* **Volcano plots -** Shows gene expression versus P-value to visualize differentially expressed genes for each experiment. Significant genes are labeled with text.
+
+# Diagnostic plots
+* **./plots/mds_plots.pdf -** Diplays the mulidimensional scaling (MDS) for a given time point, to assess inter-sample variation.
 * **./plots/mean_var_plots.pdf -** Plots the gene expression couns versus the variance in gene exprssion counts for each gene (the curve should look like a sideways "S")
-* **./plots/weight_plots.pdf -** Quality weights for each of the experiments. The lower the weight, the lower the sample quality.
+* **./plots/weight_plots.pdf -** Quality weights for each of the experiments. The lower the weight, the lower the sample quality.*
 
-To plot expression levels for your favorite gene in the hom mice \(relative to wild type\) for each of the five developmental time points, you can use the `genesVsTime.R` script.
