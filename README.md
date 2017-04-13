@@ -21,7 +21,7 @@ Options:
 		Count file for control mice (should contain at least 2 replicates)
 
 	-t CHARACTER, --testCountFile=CHARACTER
-		Count file for test mice (either WT or MUT)
+		Count file for test mice (either HET or MUT, should also contain at least 2 replicates)
 
 	-r CHARACTER, --results=CHARACTER
 		Directory for output files
